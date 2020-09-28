@@ -20,6 +20,7 @@ import * as os from 'os';
 import { TypedError } from 'typed-error';
 import { getChalk, stripIndent } from './utils/lazy';
 import { getHelp } from './utils/messages';
+import { CliSettings } from './utils/bootstrap';
 
 export class ExpectedError extends TypedError {}
 
@@ -99,6 +100,17 @@ function interpret(error: Error): string {
 	return error.message;
 }
 
+function loadDataDirectory(): string {
+	try {
+		const settings = new CliSettings();
+		return settings.get('dataDirectory') as string;
+	} catch {
+		return os.platform() === 'win32'
+			? 'C:\\Users\\<user>\\_balena'
+			: '$HOME/.balena';
+	}
+}
+
 const messages: {
 	[key: string]: (error: Error & { path?: string }) => string;
 } = {
@@ -122,6 +134,23 @@ const messages: {
 
 	EACCES: (e) => messages.EPERM(e),
 
+	BalenaSettingsPermissionError: () => {
+		const dataDirectory = loadDataDirectory();
+
+		return stripIndent`
+			Error reading data directory: "${dataDirectory}"
+
+			This error usually indicates that the user doesn't have permissions over that directory,
+			which can happen if balena CLI was executed as the root user.
+
+			${
+				os.platform() === 'win32'
+					? `Try resetting the ownership by opening a new Command Prompt as administrator and running: \`takeown /f ${dataDirectory} /r\``
+					: `Try resetting the ownership by running: \`sudo chown -R $(whoami) ${dataDirectory}\``
+			}
+		`;
+	},
+
 	ETIMEDOUT: () =>
 		'Oops something went wrong, please check your connection and try again.',
 
@@ -143,6 +172,7 @@ const messages: {
 };
 
 const EXPECTED_ERROR_REGEXES = [
+	/^BalenaSettingsPermissionError/, // balena-settings-storage
 	/^BalenaAmbiguousApplication/, // balena-sdk
 	/^BalenaAmbiguousDevice/, // balena-sdk
 	/^BalenaApplicationNotFound/, // balena-sdk
