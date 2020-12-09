@@ -344,8 +344,12 @@ application name or numeric ID
 
 Create a new balena application.
 
-You can specify the application device type with the `--type` option.
-Otherwise, an interactive dropdown will be shown for you to select from.
+You can specify the organization the application should belong to using
+the `--organization` option, and the application device type with the
+`--type` option.
+
+If no device type or organization is specified, interactive dropdowns
+will be shown for you to select from.
 
 You can see a list of supported device types with:
 
@@ -354,7 +358,8 @@ $ balena devices supported
 Examples:
 
 	$ balena app create MyApp
-	$ balena app create MyApp --type raspberry-pi
+	$ balena app create MyApp --organization MyOrg
+	$ balena app create MyApp -o MyOrg --type raspberry-pi
 
 ### Arguments
 
@@ -363,6 +368,10 @@ Examples:
 application name
 
 ### Options
+
+#### -o, --organization ORGANIZATION
+
+the organization the application should belong to
 
 #### -t, --type TYPE
 

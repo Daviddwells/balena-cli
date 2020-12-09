@@ -20,9 +20,10 @@ import Command from '../../command';
 import { ExpectedError } from '../../errors';
 import * as cf from '../../utils/common-flags';
 import { getBalenaSdk, stripIndent } from '../../utils/lazy';
-import type * as BalenaSDK from 'balena-sdk';
+import type { Application } from 'balena-sdk';
 
 interface FlagsDef {
+	organization?: string;
 	type?: string; // application device type
 	help: void;
 }
@@ -37,16 +38,22 @@ export default class AppCreateCmd extends Command {
 
 		Create a new balena application.
 
-		You can specify the application device type with the \`--type\` option.
-		Otherwise, an interactive dropdown will be shown for you to select from.
+		You can specify the organization the application should belong to using
+		the \`--organization\` option, and the application device type with the
+		\`--type\` option.
+
+		If no device type or organization is specified, interactive dropdowns
+		will be shown for you to select from.
 
 		You can see a list of supported device types with:
 
 		$ balena devices supported
-`;
+	`;
+
 	public static examples = [
 		'$ balena app create MyApp',
-		'$ balena app create MyApp --type raspberry-pi',
+		'$ balena app create MyApp --organization MyOrg',
+		'$ balena app create MyApp -o MyOrg --type raspberry-pi',
 	];
 
 	public static args = [
@@ -60,6 +67,10 @@ export default class AppCreateCmd extends Command {
 	public static usage = 'app create <name>';
 
 	public static flags: flags.Input<FlagsDef> = {
+		organization: flags.string({
+			char: 'o',
+			description: 'the organization the application should belong to',
+		}),
 		type: flags.string({
 			char: 't',
 			description:
@@ -75,30 +86,51 @@ export default class AppCreateCmd extends Command {
 			AppCreateCmd,
 		);
 
-		const balena = getBalenaSdk();
-
-		// Create application
+		// Ascertain device type
 		const deviceType =
 			options.type ||
 			(await (await import('../../utils/patterns')).selectDeviceType());
-		let application: BalenaSDK.Application;
+
+		// Ascertain organization
+		const organization = options.organization || (await this.getOrganization());
+
+		// Create application
+		let application: Application;
 		try {
-			application = await balena.models.application.create({
+			application = await getBalenaSdk().models.application.create({
 				name: params.name,
 				deviceType,
-				organization: (await balena.auth.whoami())!,
+				organization,
 			});
 		} catch (err) {
 			// BalenaRequestError: Request error: Unique key constraint violated
 			if ((err.message || '').toLowerCase().includes('unique')) {
-				throw new ExpectedError(
-					`Error: application "${params.name}" already exists`,
-				);
+				const slug = `${organization.toLowerCase()}/${params.name.toLowerCase()}`;
+				throw new ExpectedError(`Error: application "${slug}" already exists`);
 			}
 			throw err;
 		}
-		console.info(
+
+		// Output result
+		console.log(
 			`Application created: ${application.slug} (${deviceType}, id ${application.id})`,
 		);
+	}
+
+	async getOrganization() {
+		const { getOwnOrganizations } = await import('../../utils/sdk');
+		const organizations = await getOwnOrganizations(getBalenaSdk());
+
+		if (organizations.length === 0) {
+			// User is not a member of any organizations (should not happen).
+			throw new Error('This account is not a member of any organizations');
+		} else if (organizations.length === 1) {
+			// User is a member of only one organization - use this.
+			return organizations[0].handle;
+		} else {
+			// User is a member of multiple organizations -
+			const { selectOrganization } = await import('../../utils/patterns');
+			return selectOrganization(organizations);
+		}
 	}
 }

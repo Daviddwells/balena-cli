@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-import type { Application, BalenaSDK, PineOptions } from 'balena-sdk';
+import type {
+	Application,
+	BalenaSDK,
+	Organization,
+	PineOptions,
+} from 'balena-sdk';
 
 /**
  * Wraps the sdk application.get method,
@@ -27,10 +32,6 @@ export async function getApplication(
 	nameOrSlugOrId: string | number,
 	options?: PineOptions<Application>,
 ): Promise<Application> {
-	// TODO: Consider whether it would be useful to generally include interactive selection of application here,
-	//       when nameOrSlugOrId not provided.
-	//       e.g. nameOrSlugOrId || (await (await import('../../utils/patterns')).selectApplication()),
-	//       See commands/device/init.ts ~ln100 for example
 	const { looksLikeInteger } = await import('./validation');
 	if (looksLikeInteger(nameOrSlugOrId as string)) {
 		try {
@@ -46,4 +47,28 @@ export async function getApplication(
 		}
 	}
 	return sdk.models.application.get(nameOrSlugOrId, options);
+}
+
+/**
+ * Wraps the sdk organization.getAll method,
+ * restricting to those orgs user is a member of
+ */
+export async function getOwnOrganizations(
+	sdk: BalenaSDK,
+): Promise<Organization[]> {
+	return await sdk.models.organization.getAll({
+		$filter: {
+			organization_membership: {
+				$any: {
+					$alias: 'orm',
+					$expr: {
+						orm: {
+							user: await sdk.auth.getUserId(),
+						},
+					},
+				},
+			},
+		},
+		$orderby: 'name asc',
+	});
 }

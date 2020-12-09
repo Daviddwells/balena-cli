@@ -149,6 +149,7 @@ const EXPECTED_ERROR_REGEXES = [
 	/^BalenaDeviceNotFound/, // balena-sdk
 	/^BalenaExpiredToken/, // balena-sdk
 	/^BalenaInvalidDeviceType/, // balena-sdk
+	/^BalenaOrganizationNotFound/, // balena-sdk
 	/Request error: Unauthorized$/, // balena-sdk
 	/^Missing \d+ required arg/, // oclif parser: RequiredArgsError
 	/Missing required flag/, // oclif parser: RequiredFlagError
