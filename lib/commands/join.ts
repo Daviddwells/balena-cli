@@ -55,6 +55,7 @@ export default class JoinCmd extends Command {
 		'$ balena join',
 		'$ balena join balena.local',
 		'$ balena join balena.local --application MyApp',
+		'$ balena join balena.local -a myorg/myapp',
 		'$ balena join 192.168.1.25',
 		'$ balena join 192.168.1.25 --application MyApp',
 	];
@@ -72,8 +73,9 @@ export default class JoinCmd extends Command {
 
 	public static flags: flags.Input<FlagsDef> = {
 		application: {
-			description: 'the name of the application the device should join',
 			...cf.application,
+			description:
+				'the name or org/name slug of the application the device should join',
 		},
 		pollInterval: flags.integer({
 			description: 'the interval in minutes to check for updates',

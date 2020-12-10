@@ -28,7 +28,7 @@ USAGE
   $ balena devices
 
 OPTIONS
-  -a, --application <application>  application name
+  -a, --application <application>  application name or org/name slug
   -h, --help                       show CLI help
   -j, --json                       produce JSON output instead of tabular output
   --app <app>                      same as '--application'
@@ -49,6 +49,7 @@ EXAMPLES
   $ balena devices --application MyApp
   $ balena devices --app MyApp
   $ balena devices -a MyApp
+  $ balena devices -a myorg/myapp
 `;
 
 describe('balena devices', function () {

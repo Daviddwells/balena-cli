@@ -29,7 +29,7 @@ ARGUMENTS
   <uuid>  comma-separated list (no blank spaces) of device UUIDs to be moved
 
 OPTIONS
-  -a, --application <application>  application name
+  -a, --application <application>  application name or org/name slug
   -h, --help                       show CLI help
   --app <app>                      same as '--application'
 
@@ -43,6 +43,7 @@ EXAMPLES
   $ balena device move 7cf02a6
   $ balena device move 7cf02a6,dc39e52
   $ balena device move 7cf02a6 --application MyNewApp
+  $ balena device move 7cf02a6 -a myorg/mynewapp
 `;
 
 describe('balena device move', function () {

@@ -20,8 +20,6 @@ import Command from '../command';
 import { ExpectedError } from '../errors';
 import * as cf from '../utils/common-flags';
 import { getBalenaSdk, getVisuals, stripIndent } from '../utils/lazy';
-import { disambiguateReleaseParam } from '../utils/normalization';
-import { tryAsInteger } from '../utils/validation';
 
 interface FlagsDef {
 	application?: string;
@@ -41,6 +39,7 @@ export default class TagsCmd extends Command {
 
 	public static examples = [
 		'$ balena tags --application MyApp',
+		'$ balena tags -a myorg/myapp',
 		'$ balena tags --device 7cf02a6',
 		'$ balena tags --release 1234',
 		'$ balena tags --release b376b0e544e9429483b656490e5b9443b4349bd6',
@@ -53,6 +52,10 @@ export default class TagsCmd extends Command {
 			...cf.application,
 			exclusive: ['app', 'device', 'release'],
 		},
+		app: {
+			...cf.app,
+			exclusive: ['application', 'device', 'release'],
+		},
 		device: {
 			...cf.device,
 			exclusive: ['app', 'application', 'release'],
@@ -62,10 +65,6 @@ export default class TagsCmd extends Command {
 			exclusive: ['app', 'application', 'device'],
 		},
 		help: cf.help,
-		app: flags.string({
-			description: "same as '--application'",
-			exclusive: ['application', 'device', 'release'],
-		}),
 	};
 
 	public static authenticated = true;
@@ -84,6 +83,8 @@ export default class TagsCmd extends Command {
 			throw new ExpectedError(this.missingResourceMessage);
 		}
 
+		const { tryAsInteger } = await import('../utils/validation');
+
 		let tags;
 
 		if (options.application) {
@@ -97,6 +98,9 @@ export default class TagsCmd extends Command {
 			);
 		}
 		if (options.release) {
+			const { disambiguateReleaseParam } = await import(
+				'../utils/normalization'
+			);
 			const releaseParam = await disambiguateReleaseParam(
 				balena,
 				options.release,
@@ -115,7 +119,7 @@ export default class TagsCmd extends Command {
 	protected missingResourceMessage = stripIndent`
 					To list tags for a resource, you must provide exactly one of:
 
-					  * An application, with --application <appname>
+					  * An application, with --application <appNameOrSlug>
 					  * A device, with --device <uuid>
 					  * A release, with --release <id or commit>
 

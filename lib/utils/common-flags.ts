@@ -19,14 +19,17 @@ import { flags } from '@oclif/command';
 
 import type { IBooleanFlag } from '@oclif/parser/lib/flags';
 import { stripIndent } from './lazy';
+import { lowercaseIfSlug } from './normalization';
 
 export const application = flags.string({
 	char: 'a',
-	description: 'application name',
+	description: 'application name or org/name slug',
+	parse: lowercaseIfSlug,
 });
 // TODO: Consider remove second alias 'app' when we can, to simplify.
 export const app = flags.string({
 	description: "same as '--application'",
+	parse: lowercaseIfSlug,
 });
 
 export const device = flags.string({
