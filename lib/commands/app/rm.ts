@@ -19,7 +19,7 @@ import { flags } from '@oclif/command';
 import Command from '../../command';
 import * as cf from '../../utils/common-flags';
 import { getBalenaSdk, stripIndent } from '../../utils/lazy';
-import { tryAsInteger } from '../../utils/validation';
+import { lowercaseIfSlug } from '../../utils/normalization';
 
 interface FlagsDef {
 	yes: boolean;
@@ -27,7 +27,7 @@ interface FlagsDef {
 }
 
 interface ArgsDef {
-	name: string;
+	nameOrSlug: string;
 }
 
 export default class AppRmCmd extends Command {
@@ -45,13 +45,14 @@ export default class AppRmCmd extends Command {
 
 	public static args = [
 		{
-			name: 'name',
-			description: 'application name or numeric ID',
+			name: 'nameOrSlug',
+			description: 'application name or org/name slug',
 			required: true,
+			parse: lowercaseIfSlug,
 		},
 	];
 
-	public static usage = 'app rm <name>';
+	public static usage = 'app rm <nameOrSlug>';
 
 	public static flags: flags.Input<FlagsDef> = {
 		yes: cf.yes,
@@ -65,15 +66,19 @@ export default class AppRmCmd extends Command {
 			AppRmCmd,
 		);
 
-		const patterns = await import('../../utils/patterns');
+		const { confirm } = await import('../../utils/patterns');
 
 		// Confirm
-		await patterns.confirm(
+		await confirm(
 			options.yes ?? false,
-			`Are you sure you want to delete application ${params.name}?`,
+			`Are you sure you want to delete application ${params.nameOrSlug}?`,
 		);
 
+		const { tryAsInteger } = await import('../../utils/validation');
+
 		// Remove
-		await getBalenaSdk().models.application.remove(tryAsInteger(params.name));
+		await getBalenaSdk().models.application.remove(
+			tryAsInteger(params.nameOrSlug),
+		);
 	}
 }

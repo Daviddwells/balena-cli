@@ -20,6 +20,7 @@ import type { IArg } from '@oclif/parser/lib/args';
 import Command from '../../command';
 import * as cf from '../../utils/common-flags';
 import { getBalenaSdk, stripIndent } from '../../utils/lazy';
+import { lowercaseIfSlug } from '../../utils/normalization';
 
 interface FlagsDef {
 	uuid?: string;
@@ -39,13 +40,15 @@ export default class DeviceRegisterCmd extends Command {
 	public static examples = [
 		'$ balena device register MyApp',
 		'$ balena device register MyApp --uuid <uuid>',
+		'$ balena device register myorg/myapp --uuid <uuid>',
 	];
 
 	public static args: Array<IArg<any>> = [
 		{
 			name: 'application',
-			description: 'the name or id of application to register device with',
+			description: 'application name or org/name slug',
 			required: true,
+			parse: lowercaseIfSlug,
 		},
 	];
 

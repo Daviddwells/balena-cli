@@ -85,3 +85,10 @@ export async function disambiguateReleaseParam(
 	// Must be a number only uuid/hash (or nonexistent release)
 	return (await balena.models.release.get(release, { $select: 'id' })).id;
 }
+
+/**
+ * Convert to lowercase if looks like slug
+ */
+export function lowercaseIfSlug(s: string) {
+	return s.includes('/') ? s.toLowerCase() : s;
+}

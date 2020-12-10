@@ -20,9 +20,7 @@ import type { IArg } from '@oclif/parser/lib/args';
 import type { Application, BalenaSDK } from 'balena-sdk';
 import Command from '../../command';
 import * as cf from '../../utils/common-flags';
-import { expandForAppName } from '../../utils/helpers';
 import { getBalenaSdk, stripIndent } from '../../utils/lazy';
-import { tryAsInteger } from '../../utils/validation';
 import { ExpectedError } from '../../errors';
 
 interface ExtendedDevice extends DeviceWithDeviceType {
@@ -52,6 +50,7 @@ export default class DeviceMoveCmd extends Command {
 		'$ balena device move 7cf02a6',
 		'$ balena device move 7cf02a6,dc39e52',
 		'$ balena device move 7cf02a6 --application MyNewApp',
+		'$ balena device move 7cf02a6 -a myorg/mynewapp',
 	];
 
 	public static args: Array<IArg<any>> = [
@@ -79,6 +78,9 @@ export default class DeviceMoveCmd extends Command {
 		);
 
 		const balena = getBalenaSdk();
+
+		const { tryAsInteger } = await import('../../utils/validation');
+		const { expandForAppName } = await import('../../utils/helpers');
 
 		options.application = options.application || options.app;
 		delete options.app;

@@ -36,6 +36,7 @@ import type {
 import type { Preloader } from 'balena-preload';
 import { parseAsInteger } from '../utils/validation';
 import { ExpectedError } from '../errors';
+import { lowercaseIfSlug } from '../utils/normalization';
 
 interface FlagsDef extends DockerConnectionCliFlags {
 	app?: string;
@@ -68,7 +69,8 @@ export default class PreloadCmd extends Command {
 	`;
 
 	public static examples = [
-		'$ balena preload balena.img --app 1234 --commit e1f2592fc6ee949e68756d4f4a48e49bff8d72a0 --splash-image image.png',
+		'$ balena preload balena.img --app MyApp --commit e1f2592fc6ee949e68756d4f4a48e49bff8d72a0',
+		'$ balena preload balena.img --app myorg/myapp --commit e1f2592fc6ee949e68756d4f4a48e49bff8d72a0 --splash-image image.png',
 		'$ balena preload balena.img',
 	];
 
@@ -83,9 +85,11 @@ export default class PreloadCmd extends Command {
 	public static usage = 'preload <image>';
 
 	public static flags: flags.Input<FlagsDef> = {
+		// TODO: Replace with application/a in #v13?
 		app: flags.string({
-			description: 'name of the application to preload',
+			description: 'name of org/name slug of the application to preload',
 			char: 'a',
+			parse: lowercaseIfSlug,
 		}),
 		commit: flags.string({
 			description: `\

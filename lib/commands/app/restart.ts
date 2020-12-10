@@ -19,14 +19,14 @@ import { flags } from '@oclif/command';
 import Command from '../../command';
 import * as cf from '../../utils/common-flags';
 import { getBalenaSdk, stripIndent } from '../../utils/lazy';
-import { tryAsInteger } from '../../utils/validation';
+import { lowercaseIfSlug } from '../../utils/normalization';
 
 interface FlagsDef {
 	help: void;
 }
 
 interface ArgsDef {
-	name: string;
+	nameOrSlug: string;
 }
 
 export default class AppRestartCmd extends Command {
@@ -35,17 +35,21 @@ export default class AppRestartCmd extends Command {
 
 		Restart all devices belonging to an application.
 `;
-	public static examples = ['$ balena app restart MyApp'];
+	public static examples = [
+		'$ balena app restart MyApp',
+		'$ balena app restart myorg/myapp',
+	];
 
 	public static args = [
 		{
-			name: 'name',
-			description: 'application name or numeric ID',
+			name: 'nameOrSlug',
+			description: 'application name or org/name slug',
 			required: true,
+			parse: lowercaseIfSlug,
 		},
 	];
 
-	public static usage = 'app restart <name>';
+	public static usage = 'app restart <nameOrSlug>';
 
 	public static flags: flags.Input<FlagsDef> = {
 		help: cf.help,
@@ -56,6 +60,10 @@ export default class AppRestartCmd extends Command {
 	public async run() {
 		const { args: params } = this.parse<FlagsDef, ArgsDef>(AppRestartCmd);
 
-		await getBalenaSdk().models.application.restart(tryAsInteger(params.name));
+		const { tryAsInteger } = await import('../../utils/validation');
+
+		await getBalenaSdk().models.application.restart(
+			tryAsInteger(params.nameOrSlug),
+		);
 	}
 }

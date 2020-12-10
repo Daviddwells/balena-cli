@@ -20,6 +20,7 @@ import Command from '../../command';
 import * as cf from '../../utils/common-flags';
 import { getBalenaSdk, getVisuals, stripIndent } from '../../utils/lazy';
 import type { Release } from 'balena-sdk';
+import { lowercaseIfSlug } from '../../utils/normalization';
 
 interface FlagsDef {
 	help: void;
@@ -42,6 +43,7 @@ export default class AppCmd extends Command {
 			name: 'nameOrSlug',
 			description: 'application name or org/name slug',
 			required: true,
+			parse: lowercaseIfSlug,
 		},
 	];
 
