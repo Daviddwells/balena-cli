@@ -164,10 +164,10 @@ Users are encouraged to regularly update the balena CLI to the latest version.
 	- [apps](#apps)
 	- [app &#60;nameorslug&#62;](#app-nameorslug)
 	- [app create &#60;name&#62;](#app-create-name)
-	- [app purge &#60;name&#62;](#app-purge-name)
+	- [app purge &#60;nameorslug&#62;](#app-purge-nameorslug)
 	- [app rename &#60;name&#62; [newname]](#app-rename-name-newname)
-	- [app restart &#60;name&#62;](#app-restart-name)
-	- [app rm &#60;name&#62;](#app-rm-name)
+	- [app restart &#60;nameorslug&#62;](#app-restart-nameorslug)
+	- [app rm &#60;nameorslug&#62;](#app-rm-nameorslug)
 
 - Authentication
 
@@ -312,7 +312,7 @@ the API key name
 list all your balena applications.
 
 For detailed information on a particular application,
-use `balena app <name> instead`.
+use `balena app <nameOrSlug> instead`.
 
 Examples:
 
@@ -369,7 +369,7 @@ application name
 
 application device type (Check available types with `balena devices supported`)
 
-## app purge &#60;name&#62;
+## app purge &#60;nameOrSlug&#62;
 
 Purge data from all devices belonging to an application.
 This will clear the application's /data directory.
@@ -377,12 +377,13 @@ This will clear the application's /data directory.
 Examples:
 
 	$ balena app purge MyApp
+	$ balena app purge myorg/myapp
 
 ### Arguments
 
-#### NAME
+#### NAMEORSLUG
 
-application name or numeric ID
+application name or org/name slug
 
 ### Options
 
@@ -410,23 +411,24 @@ the new name for the application
 
 ### Options
 
-## app restart &#60;name&#62;
+## app restart &#60;nameOrSlug&#62;
 
 Restart all devices belonging to an application.
 
 Examples:
 
 	$ balena app restart MyApp
+	$ balena app restart myorg/myapp
 
 ### Arguments
 
-#### NAME
+#### NAMEORSLUG
 
-application name or numeric ID
+application name or org/name slug
 
 ### Options
 
-## app rm &#60;name&#62;
+## app rm &#60;nameOrSlug&#62;
 
 Permanently remove a balena application.
 
@@ -439,9 +441,9 @@ Examples:
 
 ### Arguments
 
-#### NAME
+#### NAMEORSLUG
 
-application name or numeric ID
+application name or org/name slug
 
 ### Options
 
@@ -544,12 +546,13 @@ Examples:
 	$ balena devices --application MyApp
 	$ balena devices --app MyApp
 	$ balena devices -a MyApp
+	$ balena devices -a myorg/myapp
 
 ### Options
 
 #### -a, --application APPLICATION
 
-application name
+application name or org/name slug
 
 #### --app APP
 
@@ -628,7 +631,7 @@ the uuid of the device to identify
 
 ## device init
 
-Initialise a device by downloading the OS image of a certain application
+Initialize a device by downloading the OS image of a certain application
 and writing it to an SD Card.
 
 Note, if the application option is omitted it will be prompted
@@ -638,12 +641,13 @@ Examples:
 
 	$ balena device init
 	$ balena device init --application MyApp
+	$ balena device init -a myorg/myapp
 
 ### Options
 
 #### -a, --application APPLICATION
 
-application name
+application name or org/name slug
 
 #### --app APP
 
@@ -687,6 +691,7 @@ Examples:
 	$ balena device move 7cf02a6
 	$ balena device move 7cf02a6,dc39e52
 	$ balena device move 7cf02a6 --application MyNewApp
+	$ balena device move 7cf02a6 -a myorg/mynewapp
 
 ### Arguments
 
@@ -698,7 +703,7 @@ comma-separated list (no blank spaces) of device UUIDs to be moved
 
 #### -a, --application APPLICATION
 
-application name
+application name or org/name slug
 
 #### --app APP
 
@@ -823,12 +828,13 @@ Examples:
 
 	$ balena device register MyApp
 	$ balena device register MyApp --uuid <uuid>
+	$ balena device register myorg/myapp --uuid <uuid>
 
 ### Arguments
 
 #### APPLICATION
 
-the name or id of application to register device with
+application name or org/name slug
 
 ### Options
 
@@ -972,6 +978,7 @@ by its owner).
 Examples:
 
 	$ balena envs --application MyApp
+	$ balena envs --application myorg/myapp
 	$ balena envs --application MyApp --json
 	$ balena envs --application MyApp --service MyService
 	$ balena envs --application MyApp --service MyService
@@ -989,7 +996,7 @@ No-op since balena CLI v12.0.0.
 
 #### -a, --application APPLICATION
 
-application name
+application name or org/name slug
 
 #### -c, --config
 
@@ -1108,6 +1115,7 @@ Examples:
 
 	$ balena env add TERM --application MyApp
 	$ balena env add EDITOR vim --application MyApp
+	$ balena env add EDITOR vim -a myorg/myapp
 	$ balena env add EDITOR vim --application MyApp,MyApp2
 	$ balena env add EDITOR vim --application MyApp --service MyService
 	$ balena env add EDITOR vim --application MyApp,MyApp2 --service MyService,MyService2
@@ -1130,7 +1138,7 @@ variable value; if omitted, use value from this process' environment
 
 #### -a, --application APPLICATION
 
-application name
+application name or org/name slug
 
 #### -d, --device DEVICE
 
@@ -1217,6 +1225,7 @@ device or release.
 Examples:
 
 	$ balena tags --application MyApp
+	$ balena tags -a myorg/myapp
 	$ balena tags --device 7cf02a6
 	$ balena tags --release 1234
 	$ balena tags --release b376b0e544e9429483b656490e5b9443b4349bd6
@@ -1225,7 +1234,11 @@ Examples:
 
 #### -a, --application APPLICATION
 
-application name
+application name or org/name slug
+
+#### --app APP
+
+same as '--application'
 
 #### -d, --device DEVICE
 
@@ -1235,10 +1248,6 @@ device UUID
 
 release id
 
-#### --app APP
-
-same as '--application'
-
 ## tag rm &#60;tagKey&#62;
 
 Remove a tag from an application, device or release.
@@ -1246,6 +1255,7 @@ Remove a tag from an application, device or release.
 Examples:
 
 	$ balena tag rm myTagKey --application MyApp
+	$ balena tag rm myTagKey -a myorg/myapp
 	$ balena tag rm myTagKey --device 7cf02a6
 	$ balena tag rm myTagKey --release 1234
 	$ balena tag rm myTagKey --release b376b0e544e9429483b656490e5b9443b4349bd6
@@ -1260,7 +1270,11 @@ the key string of the tag
 
 #### -a, --application APPLICATION
 
-application name
+application name or org/name slug
+
+#### --app APP
+
+same as '--application'
 
 #### -d, --device DEVICE
 
@@ -1269,10 +1283,6 @@ device UUID
 #### -r, --release RELEASE
 
 release id
-
-#### --app APP
-
-same as '--application'
 
 ## tag set &#60;tagKey&#62; [value]
 
@@ -1285,6 +1295,7 @@ provided, a tag with an empty value is created.
 Examples:
 
 	$ balena tag set mySimpleTag --application MyApp
+	$ balena tag set mySimpleTag -a myorg/myapp
 	$ balena tag set myCompositeTag myTagValue --application MyApp
 	$ balena tag set myCompositeTag myTagValue --device 7cf02a6
 	$ balena tag set myCompositeTag "my tag value with whitespaces" --device 7cf02a6
@@ -1306,7 +1317,11 @@ the optional value associated with the tag
 
 #### -a, --application APPLICATION
 
-application name
+application name or org/name slug
+
+#### --app APP
+
+same as '--application'
 
 #### -d, --device DEVICE
 
@@ -1315,10 +1330,6 @@ device UUID
 #### -r, --release RELEASE
 
 release id
-
-#### --app APP
-
-same as '--application'
 
 # Help and Version
 
@@ -1824,6 +1835,7 @@ Examples:
 	$ balena os configure ../path/rpi3.img --device 7cf02a6
 	$ balena os configure ../path/rpi3.img --device 7cf02a6 --device-api-key <existingDeviceKey>
 	$ balena os configure ../path/rpi3.img --app MyApp
+	$ balena os configure ../path/rpi3.img -a myorg/myapp
 	$ balena os configure ../path/rpi3.img --app MyApp --version 2.12.7
 	$ balena os configure ../path/rpi3.img --app MyFinApp --device-type raspberrypi3
 	$ balena os configure ../path/rpi3.img --app MyFinApp --device-type raspberrypi3 --config myWifiConfig.json
@@ -1840,13 +1852,13 @@ path to a balenaOS image file, e.g. "rpi3.img"
 
 ask advanced configuration questions (when in interactive mode)
 
+#### -a, --application APPLICATION
+
+application name or org/name slug
+
 #### --app APP
 
 same as '--application'
-
-#### -a, --application APPLICATION
-
-application name
 
 #### --config CONFIG
 
@@ -1949,6 +1961,7 @@ Examples:
 	$ balena config generate --device 7cf02a6 --version 2.12.7 --device-api-key <existingDeviceKey>
 	$ balena config generate --device 7cf02a6 --version 2.12.7 --output config.json
 	$ balena config generate --app MyApp --version 2.12.7
+	$ balena config generate --app myorg/myapp --version 2.12.7
 	$ balena config generate --app MyApp --version 2.12.7 --device-type fincm3
 	$ balena config generate --app MyApp --version 2.12.7 --output config.json
 	$ balena config generate --app MyApp --version 2.12.7 --network wifi --wifiSsid mySsid --wifiKey abcdefgh --appUpdatePollInterval 1
@@ -1961,7 +1974,7 @@ a balenaOS version
 
 #### -a, --application APPLICATION
 
-application name
+application name or org/name slug
 
 #### --app APP
 
@@ -2121,7 +2134,8 @@ check: https://github.com/balena-io/balena-cli/blob/master/INSTALL.md
 
 Examples:
 
-	$ balena preload balena.img --app 1234 --commit e1f2592fc6ee949e68756d4f4a48e49bff8d72a0 --splash-image image.png
+	$ balena preload balena.img --app MyApp --commit e1f2592fc6ee949e68756d4f4a48e49bff8d72a0
+	$ balena preload balena.img --app myorg/myapp --commit e1f2592fc6ee949e68756d4f4a48e49bff8d72a0 --splash-image image.png
 	$ balena preload balena.img
 
 ### Arguments
@@ -2134,7 +2148,7 @@ the image file path
 
 #### -a, --app APP
 
-name of the application to preload
+name of org/name slug of the application to preload
 
 #### -c, --commit COMMIT
 
@@ -2937,6 +2951,7 @@ Examples:
 	$ balena join
 	$ balena join balena.local
 	$ balena join balena.local --application MyApp
+	$ balena join balena.local -a myorg/myapp
 	$ balena join 192.168.1.25
 	$ balena join 192.168.1.25 --application MyApp
 
@@ -2950,7 +2965,7 @@ the IP or hostname of device
 
 #### -a, --application APPLICATION
 
-application name
+the name or org/name slug of the application the device should join
 
 #### -i, --pollInterval POLLINTERVAL
 
@@ -3010,7 +3025,7 @@ Examples:
 
 	balena support enable --device ab346f,cd457a --duration 3d
 	balena support enable --application app3 --duration 12h
-	balena support disable -a myApp
+	balena support disable -a myorg/myapp
 
 ### Arguments
 
@@ -3026,7 +3041,7 @@ comma-separated list (no spaces) of device UUIDs
 
 #### -a, --application APPLICATION
 
-comma-separated list (no spaces) of application names
+comma-separated list (no spaces) of application names or org/name slugs
 
 #### -t, --duration DURATION
 

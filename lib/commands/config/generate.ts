@@ -60,6 +60,7 @@ export default class ConfigGenerateCmd extends Command {
 		'$ balena config generate --device 7cf02a6 --version 2.12.7 --device-api-key <existingDeviceKey>',
 		'$ balena config generate --device 7cf02a6 --version 2.12.7 --output config.json',
 		'$ balena config generate --app MyApp --version 2.12.7',
+		'$ balena config generate --app myorg/myapp --version 2.12.7',
 		'$ balena config generate --app MyApp --version 2.12.7 --device-type fincm3',
 		'$ balena config generate --app MyApp --version 2.12.7 --output config.json',
 		'$ balena config generate --app MyApp --version 2.12.7 --network wifi --wifiSsid mySsid --wifiKey abcdefgh --appUpdatePollInterval 1',
@@ -72,15 +73,8 @@ export default class ConfigGenerateCmd extends Command {
 			description: 'a balenaOS version',
 			required: true,
 		}),
-		application: flags.string({
-			description: 'application name',
-			char: 'a',
-			exclusive: ['app', 'device'],
-		}),
-		app: flags.string({
-			description: "same as '--application'",
-			exclusive: ['application', 'device'],
-		}),
+		application: { ...cf.application, exclusive: ['app', 'device'] },
+		app: { ...cf.app, exclusive: ['application', 'device'] },
 		device: flags.string({
 			description: 'device uuid',
 			char: 'd',
@@ -231,7 +225,7 @@ export default class ConfigGenerateCmd extends Command {
 		Specifying a different device type is only supported when
 		generating a config for an application:
 
-		* An application, with --app <appname>
+		* An application, with --app <appNameOrSlug>
 		* A specific device type, with --device-type <deviceTypeSlug>
 
 		See the help page for examples:

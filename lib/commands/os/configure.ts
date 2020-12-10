@@ -18,9 +18,7 @@
 import { flags } from '@oclif/command';
 import type * as BalenaSdk from 'balena-sdk';
 import * as _ from 'lodash';
-import * as path from 'path';
 import Command from '../../command';
-
 import { ExpectedError } from '../../errors';
 import * as cf from '../../utils/common-flags';
 import { getBalenaSdk, stripIndent, getCliForm } from '../../utils/lazy';
@@ -30,8 +28,8 @@ const CONNECTIONS_FOLDER = '/system-connections';
 
 interface FlagsDef {
 	advanced?: boolean;
-	app?: string;
 	application?: string;
+	app?: string;
 	config?: string;
 	'config-app-update-poll-interval'?: number;
 	'config-network'?: string;
@@ -97,6 +95,7 @@ export default class OsConfigureCmd extends Command {
 		'$ balena os configure ../path/rpi3.img --device 7cf02a6',
 		'$ balena os configure ../path/rpi3.img --device 7cf02a6 --device-api-key <existingDeviceKey>',
 		'$ balena os configure ../path/rpi3.img --app MyApp',
+		'$ balena os configure ../path/rpi3.img -a myorg/myapp',
 		'$ balena os configure ../path/rpi3.img --app MyApp --version 2.12.7',
 		'$ balena os configure ../path/rpi3.img --app MyFinApp --device-type raspberrypi3',
 		'$ balena os configure ../path/rpi3.img --app MyFinApp --device-type raspberrypi3 --config myWifiConfig.json',
@@ -118,11 +117,8 @@ export default class OsConfigureCmd extends Command {
 			description:
 				'ask advanced configuration questions (when in interactive mode)',
 		}),
-		app: flags.string({
-			description: "same as '--application'",
-			exclusive: ['application', 'device'],
-		}),
-		application: { exclusive: ['app', 'device'], ...cf.application },
+		application: { ...cf.application, exclusive: ['app', 'device'] },
+		app: { ...cf.app, exclusive: ['application', 'device'] },
 		config: flags.string({
 			description:
 				'path to a pre-generated config.json file to be injected in the OS image',
@@ -155,7 +151,6 @@ export default class OsConfigureCmd extends Command {
 			description:
 				'This option will set the device name when the device provisions',
 		}),
-		help: cf.help,
 		version: flags.string({
 			description: 'balenaOS version, for example "2.32.0" or "2.44.0+rev1"',
 		}),
@@ -166,6 +161,7 @@ export default class OsConfigureCmd extends Command {
 			description:
 				"paths to local files to place into the 'system-connections' directory",
 		}),
+		help: cf.help,
 	};
 
 	public async run() {
@@ -174,7 +170,7 @@ export default class OsConfigureCmd extends Command {
 		);
 		// Prefer options.application over options.app
 		options.application = options.application || options.app;
-		options.app = undefined;
+		delete options.app;
 
 		await validateOptions(options);
 
@@ -266,6 +262,8 @@ export default class OsConfigureCmd extends Command {
 		);
 
 		if (options['system-connection']) {
+			const path = await import('path');
+
 			const files = await Promise.all(
 				options['system-connection'].map(async (filePath) => {
 					const content = await fs.readFile(filePath, 'utf8');

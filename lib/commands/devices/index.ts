@@ -20,7 +20,6 @@ import Command from '../../command';
 import * as cf from '../../utils/common-flags';
 import { expandForAppName } from '../../utils/helpers';
 import { getBalenaSdk, getVisuals, stripIndent } from '../../utils/lazy';
-import { tryAsInteger } from '../../utils/validation';
 import type { Application } from 'balena-sdk';
 
 interface ExtendedDevice extends DeviceWithDeviceType {
@@ -55,6 +54,7 @@ export default class DevicesCmd extends Command {
 		'$ balena devices --application MyApp',
 		'$ balena devices --app MyApp',
 		'$ balena devices -a MyApp',
+		'$ balena devices -a myorg/myapp',
 	];
 
 	public static usage = 'devices';
@@ -62,11 +62,11 @@ export default class DevicesCmd extends Command {
 	public static flags: flags.Input<FlagsDef> = {
 		application: cf.application,
 		app: cf.app,
-		help: cf.help,
 		json: flags.boolean({
 			char: 'j',
 			description: 'produce JSON output instead of tabular output',
 		}),
+		help: cf.help,
 	};
 
 	public static primary = true;
@@ -85,6 +85,7 @@ export default class DevicesCmd extends Command {
 		let devices;
 
 		if (options.application != null) {
+			const { tryAsInteger } = await import('../../utils/validation');
 			devices = (await balena.models.device.getAllByApplication(
 				tryAsInteger(options.application),
 				expandForAppName,
