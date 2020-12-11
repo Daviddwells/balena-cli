@@ -1,4 +1,19 @@
 - commits:
+    - subject: Add organizations support to app create command
+      hash: 53d167518c6131f9743dfb430a2611c138a1f0c6
+      body: ''
+      footer:
+        Change-type: minor
+        change-type: minor
+        Connects-to: '#2119'
+        connects-to: '#2119'
+        Signed-off-by: Scott Lowe <scott@balena.io>
+        signed-off-by: Scott Lowe <scott@balena.io>
+      author: Scott Lowe
+      nested: []
+  version: 12.31.0
+  date: 2020-12-11T12:33:23.285Z
+- commits:
     - subject: Remove remaining v12 switches
       hash: 3edf7a038fccc8c1ddf5d09f29c37194a1104c84
       body: ''
